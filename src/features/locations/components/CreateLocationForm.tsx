@@ -27,11 +27,11 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!imageFile) {
-            setError("Please select an image file.");
+            setError("Por favor selecione uma imagem.");
             return;
         }
         if (imageFile.size > 5 * 1024 * 1024) {
-            setError("Image must be smaller than 5MB.");
+            setError("A imagem deve ser menor que 5MB.");
             return;
         }
         setError("");
@@ -86,7 +86,7 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
                     }}
                 />
                 {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-                <p className="text-gray-400 text-sm mt-1">Selecione um arquivo de imagem (máximo 5 MB).</p>
+                <p className="text-gray-400 text-sm mt-1">Selecione um arquivo de imagem (máximo 5MB). Formatos aceitos: png, jpg, jpeg e webp</p>
             </div>
 
             <div className="pt-2 flex gap-3 justify-end">
@@ -94,7 +94,7 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
                     Cancelar
                 </Button>
                 <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Creating..." : "Create Location"}
+                    {isLoading ? "Criando..." : "Criar local"}
                 </Button>
             </div>
         </form>

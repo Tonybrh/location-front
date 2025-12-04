@@ -79,7 +79,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                             setNewLocationCoords(null);
                         }}
                     >
-                        {isAddingMode ? "Cancel Adding" : <><Plus className="w-4 h-4 mr-2" /> Add Place</>}
+                        {isAddingMode ? "Cancelar" : <><Plus className="w-4 h-4 mr-2" /> Adicionar local</>}
                     </Button>
                 </header>
 
