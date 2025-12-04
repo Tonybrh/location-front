@@ -37,9 +37,9 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
         if (mapContainer.current && !map.current) {
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
-                style: "mapbox://styles/mapbox/dark-v11", // Dark mode style
-                center: [-43.210487, -22.951916], // Default to Rio (or somewhere central)
-                zoom: 11,
+                style: "mapbox://styles/mapbox/dark-v11",
+                center: [-47.8825, -15.7942], // Brasília, Brazil
+                zoom: 4,
             });
 
             map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
@@ -58,6 +58,11 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
             geolocate.on("geolocate", (e: any) => {
                 const { longitude, latitude } = e.coords;
                 setUserLocation([longitude, latitude]);
+            });
+
+            // Automatically trigger geolocation on map load
+            map.current.on("load", () => {
+                geolocate.trigger();
             });
 
             map.current.on("click", (e) => {
