@@ -20,7 +20,6 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
     const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
     const [isRouteActive, setIsRouteActive] = useState(false);
 
-    // Creation State
     const [isAddingMode, setIsAddingMode] = useState(false);
     const [newLocationCoords, setNewLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -45,7 +44,6 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
         setLocations([...locations, newLocation]);
         setNewLocationCoords(null);
         setIsAddingMode(false);
-        // Optionally select the new location
         setSelectedLocation(newLocation);
     };
 
@@ -99,7 +97,6 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                     />
                 </div>
 
-                {/* Action Bar (Mobile/Desktop) */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: selectedLocation ? 1 : 0, y: selectedLocation ? 0 : 20 }}
@@ -122,7 +119,6 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                 </motion.div>
             </div>
 
-            {/* Right Panel: Map */}
             <div className="w-full lg:w-2/3 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative">
                 <MapComponent
                     selectedLocation={selectedLocation}
@@ -132,7 +128,6 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                 />
             </div>
 
-            {/* Create Location Modal */}
             <Dialog
                 isOpen={!!newLocationCoords}
                 onClose={() => setNewLocationCoords(null)}

@@ -38,7 +38,7 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
             map.current = new mapboxgl.Map({
                 container: mapContainer.current,
                 style: "mapbox://styles/mapbox/dark-v11",
-                center: [-47.8825, -15.7942], // Brasília, Brazil
+                center: [-47.8825, -15.7942],
                 zoom: 4,
             });
 
@@ -60,7 +60,6 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
                 setUserLocation([longitude, latitude]);
             });
 
-            // Automatically trigger geolocation on map load
             map.current.on("load", () => {
                 geolocate.trigger();
             });
