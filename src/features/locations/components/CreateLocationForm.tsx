@@ -20,21 +20,30 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
     const [formData, setFormData] = useState({
         name: "",
         description: "",
-        imageUrl: "",
     });
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [error, setError] = useState<string>("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!imageFile) {
+            setError("Please select an image file.");
+            return;
+        }
+        if (imageFile.size > 5 * 1024 * 1024) {
+            setError("Image must be smaller than 5MB.");
+            return;
+        }
+        setError("");
         setIsLoading(true);
-
-        const newLocation = await LocationService.create({
-            ...formData,
-            latitude,
-            longitude,
-        });
-
+        const formDataObj = new FormData();
+        formDataObj.append("name", formData.name);
+        formDataObj.append("description", formData.description);
+        formDataObj.append("latitude", latitude.toString());
+        formDataObj.append("longitude", longitude.toString());
+        formDataObj.append("image", imageFile);
+        const newLocation = await LocationService.createWithFile(formDataObj);
         setIsLoading(false);
-
         if (newLocation) {
             onSuccess(newLocation);
         }
@@ -43,42 +52,46 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nome</Label>
                 <Input
                     id="name"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. Christ the Redeemer"
+                    placeholder="Cristo redentor"
                 />
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Descrição</Label>
                 <Textarea
                     id="description"
                     required
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="A brief description of the place..."
+                    placeholder="Uma breve descrição sobre o local..."
                 />
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="imageUrl">Image URL</Label>
+                <Label htmlFor="imageFile">Imagem (até 5 MB)</Label>
                 <Input
-                    id="imageUrl"
-                    type="url"
+                    id="imageFile"
+                    type="file"
+                    accept="image/*"
                     required
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        setImageFile(file);
+                    }}
                 />
+                {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                <p className="text-gray-400 text-sm mt-1">Selecione um arquivo de imagem (máximo 5 MB).</p>
             </div>
 
             <div className="pt-2 flex gap-3 justify-end">
                 <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
-                    Cancel
+                    Cancelar
                 </Button>
                 <Button type="submit" disabled={isLoading}>
                     {isLoading ? "Creating..." : "Create Location"}

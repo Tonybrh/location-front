@@ -3,15 +3,16 @@
 import { Location } from "@/types/location";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { MapPin } from "lucide-react";
+import { MapPin, Trash2 } from "lucide-react";
 
 interface LocationCardProps {
     location: Location;
     isSelected?: boolean;
     onSelect: (location: Location) => void;
+    onDelete: (id: string) => void;
 }
 
-export function LocationCard({ location, isSelected, onSelect }: LocationCardProps) {
+export function LocationCard({ location, isSelected, onSelect, onDelete }: LocationCardProps) {
     return (
         <motion.div
             layout
@@ -40,6 +41,18 @@ export function LocationCard({ location, isSelected, onSelect }: LocationCardPro
 
                 {/* Overlay Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                {/* Delete Button */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(location.id);
+                    }}
+                    className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Delete Location"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
             </div>
 
             <div className="p-4 relative">

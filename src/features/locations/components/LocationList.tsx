@@ -7,9 +7,10 @@ interface LocationListProps {
     locations: Location[];
     selectedLocationId?: string | null;
     onSelectLocation: (location: Location) => void;
+    onDeleteLocation: (id: string) => void;
 }
 
-export function LocationList({ locations, selectedLocationId, onSelectLocation }: LocationListProps) {
+export function LocationList({ locations, selectedLocationId, onSelectLocation, onDeleteLocation }: LocationListProps) {
     if (!locations.length) {
         return (
             <div className="text-center py-10 text-gray-400">
@@ -26,6 +27,7 @@ export function LocationList({ locations, selectedLocationId, onSelectLocation }
                     location={location}
                     isSelected={selectedLocationId === location.id}
                     onSelect={onSelectLocation}
+                    onDelete={onDeleteLocation}
                 />
             ))}
         </div>

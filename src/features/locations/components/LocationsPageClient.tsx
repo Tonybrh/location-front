@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Location } from "@/types/location";
+import { LocationService } from "@/features/locations/api/location.service";
 import { MapComponent } from "@/features/map/components/MapComponent";
 import { LocationList } from "./LocationList";
 import { motion } from "framer-motion";
@@ -48,14 +49,27 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
         setSelectedLocation(newLocation);
     };
 
+    const handleDeleteLocation = async (id: string) => {
+        if (confirm("Are you sure you want to delete this location?")) {
+            const success = await LocationService.delete(id);
+            if (success) {
+                setLocations(locations.filter(loc => loc.id !== id));
+                if (selectedLocation?.id === id) {
+                    setSelectedLocation(null);
+                    setIsRouteActive(false);
+                }
+            }
+        }
+    };
+
     return (
         <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] gap-6 p-6">
             {/* Left Panel: List */}
             <div className="w-full lg:w-1/3 flex flex-col gap-4 overflow-hidden">
                 <header className="mb-2 flex justify-between items-start">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Explore Locations</h1>
-                        <p className="text-gray-400">Select a destination or add a new one.</p>
+                        <h1 className="text-3xl font-bold text-white tracking-tight">Explore locais</h1>
+                        <p className="text-gray-400">Selecione um destino ou crie um novo !</p>
                     </div>
                     <Button
                         variant={isAddingMode ? "destructive" : "default"}
@@ -72,7 +86,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                 {isAddingMode && (
                     <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg text-blue-200 text-sm flex items-center gap-2">
                         <MapPin className="w-4 h-4" />
-                        Click on the map to place the new location.
+                        Clique no mapa para adicionar um novo local.
                     </div>
                 )}
 
@@ -81,6 +95,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                         locations={locations}
                         selectedLocationId={selectedLocation?.id}
                         onSelectLocation={handleSelectLocation}
+                        onDeleteLocation={handleDeleteLocation}
                     />
                 </div>
 
@@ -121,7 +136,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
             <Dialog
                 isOpen={!!newLocationCoords}
                 onClose={() => setNewLocationCoords(null)}
-                title="Add New Location"
+                title="Adicionar novo local"
             >
                 {newLocationCoords && (
                     <CreateLocationForm

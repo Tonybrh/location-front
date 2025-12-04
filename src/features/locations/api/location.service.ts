@@ -33,4 +33,27 @@ export const LocationService = {
             return null;
         }
     },
+
+    // New method to handle multipart/form-data with image file upload
+    createWithFile: async (formData: FormData): Promise<Location | null> => {
+        try {
+            const response = await axios.post<Location>(`${API_URL}/locations`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error creating location with file:", error);
+            return null;
+        }
+    },
+
+    delete: async (id: string): Promise<boolean> => {
+        try {
+            await axios.delete(`${API_URL}/locations/${id}`);
+            return true;
+        } catch (error) {
+            console.error(`Error deleting location ${id}:`, error);
+            return false;
+        }
+    },
 };

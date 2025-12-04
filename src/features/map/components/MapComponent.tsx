@@ -25,7 +25,6 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
         onMapClickRef.current = onMapClick;
     }, [onMapClick]);
 
-    // Initialize Map
     useEffect(() => {
         const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
         if (!token) {
@@ -74,20 +73,15 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
         };
     }, []);
 
-    // Handle Destination Marker
     useEffect(() => {
         if (!map.current || !selectedLocation) return;
 
-        // Fly to destination
         map.current.flyTo({
             center: [selectedLocation.longitude, selectedLocation.latitude],
             zoom: 14,
             essential: true,
         });
 
-        // Add marker (simplified for now, ideally we manage markers array)
-        // For this test, we can just clear old markers or keep it simple.
-        // Let's just add a marker for the selected location.
         const marker = new mapboxgl.Marker({ color: "#3b82f6" })
             .setLngLat([selectedLocation.longitude, selectedLocation.latitude])
             .setPopup(new mapboxgl.Popup().setHTML(`<h3>${selectedLocation.name}</h3>`))
@@ -98,7 +92,6 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
         };
     }, [selectedLocation]);
 
-    // Handle Route
     useEffect(() => {
         if (!startRoute || !userLocation || !selectedLocation || !map.current) return;
 
@@ -142,7 +135,6 @@ export function MapComponent({ selectedLocation, startRoute, className, onMapCli
                     });
                 }
 
-                // Fit bounds to show the whole route
                 const bounds = new mapboxgl.LngLatBounds();
                 route.forEach((coord: [number, number]) => bounds.extend(coord));
                 map.current?.fitBounds(bounds, { padding: 50 });
