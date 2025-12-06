@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import { Navigation, Plus, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { CreateLocationForm } from "./CreateLocationForm";
+import { LocationForm } from "./CreateLocationForm";
 
 interface LocationsPageClientProps {
     initialLocations: Location[];
@@ -22,6 +22,8 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
 
     const [isAddingMode, setIsAddingMode] = useState(false);
     const [newLocationCoords, setNewLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+    const [editingLocation, setEditingLocation] = useState<Location | null>(null);
 
     const handleSelectLocation = (location: Location) => {
         setSelectedLocation(location);
@@ -47,6 +49,14 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
         setSelectedLocation(newLocation);
     };
 
+    const handleLocationUpdated = (updatedLocation: Location) => {
+        setLocations(locations.map(loc => loc.id === updatedLocation.id ? updatedLocation : loc));
+        setEditingLocation(null);
+        if (selectedLocation?.id === updatedLocation.id) {
+            setSelectedLocation(updatedLocation);
+        }
+    };
+
     const handleDeleteLocation = async (id: string) => {
         if (confirm("Are you sure you want to delete this location?")) {
             const success = await LocationService.delete(id);
@@ -62,8 +72,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
 
     return (
         <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)] gap-6 p-6">
-            {/* Left Panel: List */}
-            <div className="w-full lg:w-1/3 flex flex-col gap-4 overflow-hidden">
+            <div className="w-full lg:w-2/5 flex flex-col gap-4 overflow-hidden">
                 <header className="mb-2 flex justify-between items-start">
                     <div>
                         <h1 className="text-3xl font-bold text-white tracking-tight">Explore locais</h1>
@@ -93,6 +102,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                         locations={locations}
                         selectedLocationId={selectedLocation?.id}
                         onSelectLocation={handleSelectLocation}
+                        onEditLocation={setEditingLocation}
                         onDeleteLocation={handleDeleteLocation}
                     />
                 </div>
@@ -104,7 +114,7 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                 >
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-gray-400">Selected</p>
+                            <p className="text-sm text-gray-400">Selecionado</p>
                             <p className="font-semibold text-white">{selectedLocation?.name || "None"}</p>
                         </div>
                         <button
@@ -113,13 +123,13 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
                             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors"
                         >
                             <Navigation className="w-4 h-4" />
-                            {isRouteActive ? "Routing..." : "Start Route"}
+                            {isRouteActive ? "Indo..." : "iniciar rota"}
                         </button>
                     </div>
                 </motion.div>
             </div>
 
-            <div className="w-full lg:w-2/3 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative">
+            <div className="w-full lg:w-3/5 bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative">
                 <MapComponent
                     selectedLocation={selectedLocation}
                     startRoute={isRouteActive}
@@ -129,16 +139,23 @@ export function LocationsPageClient({ initialLocations }: LocationsPageClientPro
             </div>
 
             <Dialog
-                isOpen={!!newLocationCoords}
-                onClose={() => setNewLocationCoords(null)}
-                title="Adicionar novo local"
+                isOpen={!!newLocationCoords || !!editingLocation}
+                onClose={() => {
+                    setNewLocationCoords(null);
+                    setEditingLocation(null);
+                }}
+                title={editingLocation ? "Editar local" : "Adicionar novo local"}
             >
-                {newLocationCoords && (
-                    <CreateLocationForm
-                        latitude={newLocationCoords.lat}
-                        longitude={newLocationCoords.lng}
-                        onSuccess={handleLocationCreated}
-                        onCancel={() => setNewLocationCoords(null)}
+                {(newLocationCoords || editingLocation) && (
+                    <LocationForm
+                        initialData={editingLocation || undefined}
+                        latitude={newLocationCoords?.lat}
+                        longitude={newLocationCoords?.lng}
+                        onSuccess={editingLocation ? handleLocationUpdated : handleLocationCreated}
+                        onCancel={() => {
+                            setNewLocationCoords(null);
+                            setEditingLocation(null);
+                        }}
                     />
                 )}
             </Dialog>

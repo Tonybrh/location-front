@@ -7,21 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Location } from "@/types/location";
-import { createLocationSchema } from "@/schemas/location.schema";
+import { createLocationSchema, updateLocationSchema } from "@/schemas/location.schema";
 import { z } from "zod";
 
-interface CreateLocationFormProps {
-    latitude: number;
-    longitude: number;
+interface LocationFormProps {
+    initialData?: Location;
+    latitude?: number;
+    longitude?: number;
     onSuccess: (location: Location) => void;
     onCancel: () => void;
 }
 
-export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }: CreateLocationFormProps) {
+export function LocationForm({ initialData, latitude, longitude, onSuccess, onCancel }: LocationFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        name: "",
-        description: "",
+        name: initialData?.name || "",
+        description: initialData?.description || "",
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -31,13 +32,18 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
         setErrors({});
 
         try {
-            // Validate with Zod
-            const validatedData = createLocationSchema.parse({
+            // If editing, we might not have lat/lng if they aren't changing, or we use existing
+            const lat = latitude ?? initialData?.latitude ?? 0;
+            const lng = longitude ?? initialData?.longitude ?? 0;
+
+            const schema = initialData ? updateLocationSchema : createLocationSchema;
+
+            const validatedData = schema.parse({
                 name: formData.name,
                 description: formData.description,
-                latitude,
-                longitude,
-                image: imageFile,
+                latitude: lat,
+                longitude: lng,
+                image: imageFile || (initialData?.imageUrl ? null : undefined), // null/undefined handling for optional
             });
 
             setIsLoading(true);
@@ -46,13 +52,22 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
             formDataObj.append("description", validatedData.description);
             formDataObj.append("latitude", validatedData.latitude.toString());
             formDataObj.append("longitude", validatedData.longitude.toString());
-            formDataObj.append("image", validatedData.image);
 
-            const newLocation = await LocationService.createWithFile(formDataObj);
+            if (validatedData.image instanceof File) {
+                formDataObj.append("image", validatedData.image);
+            }
+
+            let result: Location | null;
+            if (initialData) {
+                result = await LocationService.update(initialData.id, formDataObj);
+            } else {
+                result = await LocationService.createWithFile(formDataObj);
+            }
+
             setIsLoading(false);
 
-            if (newLocation) {
-                onSuccess(newLocation);
+            if (result) {
+                onSuccess(result);
             }
         } catch (error) {
             if (error instanceof z.ZodError) {
@@ -105,7 +120,9 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
                     }}
                 />
                 {errors.image && <p className="text-red-500 text-sm mt-1">{errors.image}</p>}
-                <p className="text-gray-400 text-sm mt-1">Selecione um arquivo de imagem (máximo 5MB). Formatos aceitos: PNG, JPG, JPEG e WEBP</p>
+                <p className="text-gray-400 text-sm mt-1">
+                    {initialData ? "Deixe em branco para manter a imagem atual." : "Selecione um arquivo de imagem (máximo 5MB). Formatos aceitos: PNG, JPG, JPEG e WEBP"}
+                </p>
             </div>
 
             <div className="pt-2 flex gap-3 justify-end">
@@ -113,7 +130,7 @@ export function CreateLocationForm({ latitude, longitude, onSuccess, onCancel }:
                     Cancelar
                 </Button>
                 <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Criando..." : "Criar local"}
+                    {isLoading ? (initialData ? "Salvando..." : "Criando...") : (initialData ? "Salvar alterações" : "Criar local")}
                 </Button>
             </div>
         </form>

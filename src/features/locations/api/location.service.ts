@@ -47,6 +47,18 @@ export const LocationService = {
         }
     },
 
+    update: async (id: string, formData: FormData): Promise<Location | null> => {
+        try {
+            const response = await axios.put<Location>(`${API_URL}/locations/${id}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(`Error updating location ${id}:`, error);
+            return null;
+        }
+    },
+
     delete: async (id: string): Promise<boolean> => {
         try {
             await axios.delete(`${API_URL}/locations/${id}`);

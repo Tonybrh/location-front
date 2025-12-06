@@ -16,4 +16,15 @@ export const createLocationSchema = locationSchema.extend({
         ),
 });
 
+export const updateLocationSchema = locationSchema.extend({
+    image: z.instanceof(File)
+        .refine((file) => file.size <= 5 * 1024 * 1024, "A imagem deve ser menor que 5MB")
+        .refine(
+            (file) => ["image/png", "image/jpeg", "image/jpg", "image/webp"].includes(file.type),
+            "Formato de imagem inválido. Use PNG, JPG, JPEG ou WEBP"
+        )
+        .optional()
+        .nullable(),
+});
+
 export type LocationFormData = z.infer<typeof createLocationSchema>;
